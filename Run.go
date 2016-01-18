@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"image"
+	"image/color"
 	"image/jpeg"
 	"os"
 )
@@ -15,8 +16,23 @@ func LoadImage(filename string) image.Image {
 	return img
 }
 
+func OutputImage(filename string, img image.Image) {
+	dst, _ := os.Create(filename)
+	defer dst.Close()
+	jpeg.Encode(dst, img, &jpeg.Options{jpeg.DefaultQuality})
+}
+
 func main() {
 	filename := os.Args[1]
 	img := LoadImage(filename)
-	fmt.Println(DominantColors(img, 4))
+	dominants := DominantColors(img, 4)
+	colors := make([]color.RGBA, 4)
+
+	for k, _ := range colors {
+		colors[k] = dominants[k].Color
+	}
+
+	i := MakeImage(colors)
+	OutputImage("ok.jpg", i)
+	fmt.Println("Fin.")
 }

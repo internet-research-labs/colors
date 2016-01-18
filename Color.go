@@ -5,7 +5,7 @@ import (
 	"github.com/disintegration/imaging"
 	"image"
 	"image/color"
-	// "image/png"
+	"image/draw"
 	"math"
 	"math/rand"
 	"sort"
@@ -13,8 +13,19 @@ import (
 )
 
 func MakeImage(colors []color.RGBA) image.Image {
-	i := image.NewNRGBA(image.Rect(0, 0, 256, 256))
-	return i
+	img := image.NewNRGBA(image.Rect(0, 0, 200, 200))
+
+	rects := make([]image.Rectangle, 4)
+	rects[0] = image.Rect(0, 0, 100, 100)
+	rects[1] = image.Rect(0, 100, 100, 200)
+	rects[2] = image.Rect(100, 0, 200, 100)
+	rects[3] = image.Rect(100, 100, 200, 200)
+
+	for i, v := range colors {
+		draw.Draw(img, rects[i], &image.Uniform{v}, image.ZP, draw.Src)
+	}
+
+	return img
 }
 
 // Results object
@@ -204,5 +215,7 @@ func DominantColors(i image.Image, num_colors int) []Result {
 
 	fmt.Println("...")
 
-	return Kmeans(i, num_colors)
+	results := Kmeans(i, num_colors)
+
+	return results
 }
