@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"github.com/disintegration/imaging"
 	"image"
 	"image/color"
@@ -146,8 +145,6 @@ func Kmeans(img image.Image, num_colors int) Results {
 
 	for i := 0; i < 200; i++ {
 
-		fmt.Println(centroids)
-
 		// Create
 		groups = Groups(num_colors)
 
@@ -223,17 +220,15 @@ func Distance(color1 color.RGBA, color2 color.RGBA) float64 {
 	r := math.Abs(float64(color1.R) - float64(color2.R))
 	g := math.Abs(float64(color1.G) - float64(color2.G))
 	b := math.Abs(float64(color1.B) - float64(color2.B))
-	_, max := ArgMax([]float64{r, g, b})
-	return max
-	// return r*r + g*g + b*b
+	// _, max := ArgMax([]float64{r, g, b})
+	// return max
+	return r + g + b
 	// return r + g + b
 }
 
 // Images
 func DominantColors(i image.Image, num_colors int) []Result {
 	rand.Seed(time.Now().Unix())
-
-	fmt.Println("...")
 
 	results := Kmeans(i, num_colors)
 
