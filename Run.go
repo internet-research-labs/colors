@@ -28,11 +28,14 @@ func main() {
 	dominants := DominantColors(img, 4)
 	colors := make([]color.RGBA, 4)
 
+	fmt.Println(dominants)
+
 	for k, _ := range colors {
 		colors[k] = dominants[k].Color
 	}
 
 	i := MakeImage(colors)
 	OutputImage("ok.jpg", i)
+	OutputImage("no.jpg", ScaleDown(img))
 	fmt.Println("Fin.")
 }

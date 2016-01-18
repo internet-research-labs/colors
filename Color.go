@@ -144,31 +144,48 @@ func Kmeans(img image.Image, num_colors int) Results {
 	groups := Groups(num_colors)
 	pixels := ColorVector(img)
 
-	for i := 0; i < 100; i++ {
+	for i := 0; i < 200; i++ {
+
+		fmt.Println(centroids)
+
 		// Create
 		groups = Groups(num_colors)
 
 		//
-		for j, _ := range pixels {
+		for _, pixel := range pixels {
 			// Compute difference
 			differences := make([]float64, num_colors)
 
-			// ...
+			// Differences
 			for k, _ := range differences {
-				differences[k] = Distance(pixels[j], centroids[k])
+				differences[k] = Distance(pixel, centroids[k])
 			}
 
-			// ...
+			// Figure out the closest cluster
 			index, _ := ArgMin(differences)
 
-			groups[index] = append(groups[index], pixels[j])
+			// Add to the most apropriate cluster
+			groups[index] = append(groups[index], pixel)
 		}
 
+		centroids_old := make([]color.RGBA, len(groups))
+		copy(centroids_old[:], centroids)
+		centroid_diff := make([]float64, num_colors)
+
+		// Put each pixel into a cluster
 		for j, _ := range groups {
 			centroids[j] = ColorMean(groups[j])
+			centroid_diff[j] = Distance(centroids[j], centroids_old[j])
+		}
+
+		_, max_diff := ArgMax(centroid_diff)
+
+		if max_diff < 1 {
+			break
 		}
 	}
 
+	// Measure the size of each cluster
 	for i, v := range centroids {
 		results[v] = len(groups[i])
 	}
@@ -203,10 +220,13 @@ func RandomColors(num_colors int) []color.RGBA {
 
 // Euclidean Distance
 func Distance(color1 color.RGBA, color2 color.RGBA) float64 {
-	r := float64(color1.R - color2.R)
-	g := float64(color1.G - color2.G)
-	b := float64(color1.B - color2.B)
-	return math.Sqrt(r*r + g*g + b*b)
+	r := math.Abs(float64(color1.R) - float64(color2.R))
+	g := math.Abs(float64(color1.G) - float64(color2.G))
+	b := math.Abs(float64(color1.B) - float64(color2.B))
+	_, max := ArgMax([]float64{r, g, b})
+	return max
+	// return r*r + g*g + b*b
+	// return r + g + b
 }
 
 // Images
