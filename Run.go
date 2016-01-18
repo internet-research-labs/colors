@@ -16,6 +16,7 @@ func LoadImage(filename string) image.Image {
 }
 
 func main() {
-	img := LoadImage("images/neo-tokyo.jpg")
-	fmt.Println(DominantColors(img, 5))
+	filename := os.Args[1]
+	img := LoadImage(filename)
+	fmt.Println(DominantColors(img, 4))
 }
