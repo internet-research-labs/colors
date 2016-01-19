@@ -5,6 +5,7 @@ import (
 	"image"
 	"image/color"
 	"image/draw"
+	"log"
 	"math"
 	"math/rand"
 	"sort"
@@ -118,6 +119,7 @@ func ColorVector(img image.Image) []color.RGBA {
 //
 //
 func ScaleDown(img image.Image) image.Image {
+	// TODO: Handle failures like this, when the image is Null
 	return imaging.Resize(img, 200, 200, imaging.Lanczos)
 }
 
