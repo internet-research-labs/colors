@@ -4,17 +4,31 @@ import (
 	"fmt"
 	"github.com/carbocation/go-instagram/instagram"
 	"image"
+	"log"
 	"net/http"
+	// "os"
+	"time"
 )
 
-var URL string = "https://api.instagram.com/v1/tags/%s/media/recent?client_id=%s"
-
-type InstagramConnection struct {
-	Client  instagram.Client
-	Channel chan image.Image
-	Tag     string
+func init() {
+	log.SetFlags(log.Ldate | log.Ltime | log.Lshortfile)
+	log.SetPrefix("[XXX] ")
 }
 
+// log.SetFlags(log.Ldate | log.Ltime | log.Lshortfile)
+
+// Wrapper for InstagramClient
+type InstagramConnection struct {
+	Client        instagram.Client
+	Channel       chan image.Image
+	Tag           string
+	Started       bool
+	Ticker        *time.Ticker
+	MaxID         *string
+	LastTimestamp *int64
+}
+
+// Create a New Instagram Connection
 func NewInstagramConnection(client_id, tag string) *InstagramConnection {
 	var returned InstagramConnection
 	value := instagram.NewClient(nil)
@@ -22,22 +36,48 @@ func NewInstagramConnection(client_id, tag string) *InstagramConnection {
 	returned.Client = *value
 	returned.Channel = make(chan image.Image)
 	returned.Tag = tag
+	returned.Started = false
+	returned.Ticker = time.NewTicker(time.Second * 5)
+	returned.MaxID = nil
 	return &returned
 }
 
 func (s *InstagramConnection) Get() {
-	opt := &instagram.Parameters{Count: 25}
-	media, _, _ := s.Client.Tags.RecentMedia(s.Tag, opt)
-	fmt.Println(media)
-	fmt.Println(media[0].Images.LowResolution.URL)
-	fmt.Println(media[1].Images.LowResolution.URL)
+	var opt *instagram.Parameters
+
+	// Set MaxID
+	if s.LastTimestamp == nil {
+		opt = &instagram.Parameters{Count: 25}
+		log.Println("LastTimestamp is nil")
+	} else {
+		opt = &instagram.Parameters{Count: 25, MinTimestamp: *s.LastTimestamp}
+		log.Println("LastTimestamp is", *s.LastTimestamp)
+	}
+
+	media, _, err := s.Client.Tags.RecentMedia(s.Tag, opt)
+
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+
+	latest_timestamp := int64(-1)
+
 	for _, val := range media {
+
+		if val.CreatedTime > latest_timestamp {
+			latest_timestamp = val.CreatedTime
+		}
+
 		url := val.Images.LowResolution.URL
+		// fmt.Println(url)
 		go func() {
+			log.Printf("GET \"%s\"", url)
 			s.Channel <- DownloadImage(url)
 		}()
 	}
-	fmt.Println("---")
+
+	s.LastTimestamp = &latest_timestamp
 }
 
 func (s *InstagramConnection) Images() chan image.Image {
@@ -49,4 +89,20 @@ func DownloadImage(url string) image.Image {
 	m, _, _ := image.Decode(resp.Body)
 	defer resp.Body.Close()
 	return m
+}
+
+// Start ticker
+func (s *InstagramConnection) Start() {
+	s.Started = true
+	go s.StartTicking()
+}
+
+func (s *InstagramConnection) Stop() {
+	s.Started = false
+}
+
+func (s *InstagramConnection) StartTicking() {
+	for range s.Ticker.C {
+		s.Get()
+	}
 }
