@@ -86,7 +86,10 @@ func (s *InstagramConnection) Images() chan image.Image {
 
 func DownloadImage(url string) image.Image {
 	resp, _ := http.Get(url)
-	m, _, _ := image.Decode(resp.Body)
+	m, _, err := image.Decode(resp.Body)
+	if err != nil {
+		log.Panic(err)
+	}
 	defer resp.Body.Close()
 	return m
 }
