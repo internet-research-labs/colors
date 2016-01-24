@@ -5,7 +5,6 @@ import (
 	"image"
 	"image/color"
 	"image/draw"
-	"log"
 	"math"
 	"math/rand"
 	"sort"
@@ -222,17 +221,15 @@ func Distance(color1 color.RGBA, color2 color.RGBA) float64 {
 	r := math.Abs(float64(color1.R) - float64(color2.R))
 	g := math.Abs(float64(color1.G) - float64(color2.G))
 	b := math.Abs(float64(color1.B) - float64(color2.B))
-	// _, max := ArgMax([]float64{r, g, b})
-	// return max
-	return r + g + b
-	// return r + g + b
+	_, max := ArgMax([]float64{r, g, b})
+	return max
 }
 
 // Images
-func DominantColors(i image.Image, num_colors int) []Result {
+func DominantColors(i image.Image, num_colors int) ([]Result, error) {
 	rand.Seed(time.Now().Unix())
 
 	results := Kmeans(i, num_colors)
 
-	return results
+	return results, nil
 }

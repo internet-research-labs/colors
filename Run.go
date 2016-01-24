@@ -30,12 +30,21 @@ func OutputImage(filename string, img image.Image) {
 	jpeg.Encode(dst, img, &jpeg.Options{jpeg.DefaultQuality})
 }
 
+// Main
 func main() {
 
+	// Setup variables
 	now := time.Now().Unix()
 	filename := fmt.Sprintf("%d.csv", now)
 
-	fileWriter, _ := os.Create(filename)
+	// Open file
+	fileWriter, err := os.Create(filename)
+
+	if err != nil {
+		log.Panic(fmt.Sprintf("Failed to open file \"%s\"", filename))
+	}
+
+	// Defer close
 	defer fileWriter.Close()
 
 	log.Printf("Wrinting %s", filename)
@@ -44,10 +53,6 @@ func main() {
 	csvWriter := csv.NewWriter(fileWriter)
 	record := []string{"okay"}
 	csvWriter.Write(record)
-
-	// filename := os.Args[1]
-	// img := LoadImage(filename)
-	// dominants := DominantColors(img, 4)
 
 	colors := make([]color.RGBA, 4)
 
@@ -60,7 +65,7 @@ func main() {
 	// Create connection
 	s := NewInstagramConnection(
 		"1553cfcee2b74ad9ba8f75b0a278b6ac",
-		"picoftheday",
+		"blizzard2016",
 	)
 
 	// s.Get()
@@ -71,8 +76,17 @@ func main() {
 
 	for {
 		actual_image := <-s.Images()
-		actual_dst := path.Join(".", dir_name, fmt.Sprintf("%05d_actual.jpg", count))
-		dominants := DominantColors(actual_image, 4)
+		file_name := "%05d_actual.jpg"
+		actual_dst := path.Join(".", dir_name, fmt.Sprintf(file_name, count))
+		if actual_image == nil {
+			log.Printf("Skipping file \"%s\".", file_name)
+			continue
+		}
+		dominants, err := DominantColors(actual_image, 4)
+
+		if err != nil {
+			continue
+		}
 
 		// TODO: Fix this failure condition
 		if len(dominants) != 4 {
@@ -81,11 +95,17 @@ func main() {
 
 		// Writing to CSV
 		csvWriter.Write([]string{
+			// Timestamp
+			string(time.Now().Unix()),
+			// Filename
 			fmt.Sprintf(actual_dst),
+			//
+			// Dominant Colors 1-4
 			ColorToHex(dominants[0].Color),
 			ColorToHex(dominants[1].Color),
 			ColorToHex(dominants[2].Color),
 			ColorToHex(dominants[3].Color),
+			// Frequency of Dominant Color 1-4
 			fmt.Sprintf("%d", dominants[0].Size),
 			fmt.Sprintf("%d", dominants[1].Size),
 			fmt.Sprintf("%d", dominants[2].Size),

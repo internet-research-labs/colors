@@ -11,12 +11,11 @@ import (
 	"time"
 )
 
+// ...
 func init() {
 	log.SetFlags(log.Ldate | log.Ltime | log.Lshortfile)
 	log.SetPrefix("[XXX] ")
 }
-
-// log.SetFlags(log.Ldate | log.Ltime | log.Lshortfile)
 
 // Wrapper for InstagramClient
 type InstagramConnection struct {
@@ -43,19 +42,24 @@ func NewInstagramConnection(client_id, tag string) *InstagramConnection {
 	return &returned
 }
 
+// ...
+// ...
+// ...
 func (s *InstagramConnection) Get() {
 	var opt *instagram.Parameters
 
 	// Set MaxID
 	if s.LastTimestamp == nil {
 		opt = &instagram.Parameters{Count: 25}
-		log.Println("LastTimestamp is nil")
+		// log.Println("LastTimestamp is nil")
 	} else {
 		opt = &instagram.Parameters{Count: 25, MinTimestamp: *s.LastTimestamp}
-		log.Println("LastTimestamp is", *s.LastTimestamp)
+		// log.Println("LastTimestamp is", *s.LastTimestamp)
 	}
 
-	media, _, err := s.Client.Tags.RecentMedia(s.Tag, opt)
+	media, page, err := s.Client.Tags.RecentMedia(s.Tag, opt)
+
+	fmt.Println(page)
 
 	if err != nil {
 		fmt.Println(err)
@@ -85,6 +89,10 @@ func (s *InstagramConnection) Images() chan image.Image {
 	return s.Channel
 }
 
+// Download Image
+// Download
+// @param string url
+// @return image.Image ...
 func DownloadImage(url string) image.Image {
 
 	// Get body
@@ -107,10 +115,12 @@ func (s *InstagramConnection) Start() {
 	go s.StartTicking()
 }
 
+// aka
 func (s *InstagramConnection) Stop() {
 	s.Started = false
 }
 
+// xyz
 func (s *InstagramConnection) StartTicking() {
 	for range s.Ticker.C {
 		s.Get()
