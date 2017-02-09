@@ -15,3 +15,12 @@ func MakeImage(colors []color.RGBA) image.Image {
 
 	return img
 }
+
+// Images
+func RandomColors(num_colors int) []color.RGBA {
+	palette := make([]color.RGBA, num_colors)
+	for i, _ := range palette {
+		palette[i] = RandomColor()
+	}
+	return palette
+}
