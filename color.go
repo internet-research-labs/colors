@@ -26,9 +26,7 @@ func Distance(lhs, rhs color.RGBA) float64 {
 	r := float64(lhs.R) - float64(rhs.R)
 	g := float64(lhs.G) - float64(rhs.G)
 	b := float64(lhs.B) - float64(rhs.B)
-	l1 := Luminance(lhs)
-	l2 := Luminance(rhs)
-	l := l1 - l2
+	l := Luminance(lhs) - Luminance(rhs)
 	return math.Sqrt(r*r + g*g + b*b + l*l)
 }
 
