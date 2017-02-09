@@ -1,4 +1,4 @@
-package main
+package color
 
 import (
 	"github.com/disintegration/imaging"
@@ -216,13 +216,34 @@ func RandomColors(num_colors int) []color.RGBA {
 	return palette
 }
 
-// Euclidean Distance
-func Distance(color1 color.RGBA, color2 color.RGBA) float64 {
-	r := math.Abs(float64(color1.R) - float64(color2.R))
-	g := math.Abs(float64(color1.G) - float64(color2.G))
-	b := math.Abs(float64(color1.B) - float64(color2.B))
-	_, max := ArgMax([]float64{r, g, b})
-	return max
+func Luminance(c color.RGBA) float64 {
+	r := 0.21 * float64(c.R)
+	g := 0.72 * float64(c.G)
+	b := 0.07 * float64(c.B)
+	return r + g + b
+}
+
+func Norm(c color.RGBA) float64 {
+	return Distance(c, color.RGBA{0, 0, 0, 255})
+}
+
+/*
+Return the Euclidean Distance between Two Colors
+
+Args:
+	lhs color as a vector
+	rhs color as a vector
+Return:
+	Distance
+*/
+func Distance(lhs, rhs color.RGBA) float64 {
+	r := float64(lhs.R) - float64(rhs.R)
+	g := float64(lhs.G) - float64(rhs.G)
+	b := float64(lhs.B) - float64(rhs.B)
+	l1 := Luminance(lhs)
+	l2 := Luminance(rhs)
+	l := l1 - l2
+	return math.Sqrt(r*r + g*g + b*b + l*l)
 }
 
 // Images
