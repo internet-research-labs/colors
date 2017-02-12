@@ -5,10 +5,7 @@ import (
 	"image"
 	"image/color"
 	"image/draw"
-	"math"
 	"math/rand"
-	"sort"
-	"time"
 )
 
 func MakeImage(colors []color.RGBA) image.Image {
@@ -66,38 +63,6 @@ func ColorMean(list []color.RGBA) color.RGBA {
 	}
 }
 
-func Mean(list []float64) float64 {
-	sum := 0.0
-	for _, v := range list {
-		sum += v
-	}
-	return sum / float64(len(list))
-}
-
-func ArgMin(list []float64) (int, float64) {
-	argmin := -1
-	min := math.Inf(+1)
-	for i, v := range list {
-		if v < min {
-			min = v
-			argmin = i
-		}
-	}
-	return argmin, min
-}
-
-func ArgMax(list []float64) (int, float64) {
-	argmax := -1
-	max := math.Inf(-1)
-	for i, v := range list {
-		if v > max {
-			max = v
-			argmax = i
-		}
-	}
-	return argmax, max
-}
-
 func ColorVector(img image.Image) []color.RGBA {
 	scaled_down_image := ScaleDown(img)
 	bounds := scaled_down_image.Bounds()
@@ -133,70 +98,6 @@ func Groups(n int) [][]color.RGBA {
 }
 
 //
-//
-//
-func Kmeans(img image.Image, num_colors int) Results {
-	results := make(map[color.RGBA]int)
-	final := make(Results, 0)
-
-	centroids := RandomColors(num_colors)
-	groups := Groups(num_colors)
-	pixels := ColorVector(img)
-
-	for i := 0; i < 200; i++ {
-
-		// Create
-		groups = Groups(num_colors)
-
-		//
-		for _, pixel := range pixels {
-			// Compute difference
-			differences := make([]float64, num_colors)
-
-			// Differences
-			for k, _ := range differences {
-				differences[k] = Distance(pixel, centroids[k])
-			}
-
-			// Figure out the closest cluster
-			index, _ := ArgMin(differences)
-
-			// Add to the most apropriate cluster
-			groups[index] = append(groups[index], pixel)
-		}
-
-		centroids_old := make([]color.RGBA, len(groups))
-		copy(centroids_old[:], centroids)
-		centroid_diff := make([]float64, num_colors)
-
-		// Put each pixel into a cluster
-		for j, _ := range groups {
-			centroids[j] = ColorMean(groups[j])
-			centroid_diff[j] = Distance(centroids[j], centroids_old[j])
-		}
-
-		_, max_diff := ArgMax(centroid_diff)
-
-		if max_diff < 1 {
-			break
-		}
-	}
-
-	// Measure the size of each cluster
-	for i, v := range centroids {
-		results[v] = len(groups[i])
-	}
-
-	for color, count := range results {
-		final = append(final, Result{count, color})
-	}
-
-	sort.Sort(final)
-
-	return final
-}
-
-//
 func RandomColor() color.RGBA {
 	return color.RGBA{
 		uint8(rand.Intn(255)),
@@ -204,15 +105,6 @@ func RandomColor() color.RGBA {
 		uint8(rand.Intn(255)),
 		255,
 	}
-}
-
-// Images
-func DominantColors(i image.Image, num_colors int) ([]Result, error) {
-	rand.Seed(time.Now().Unix())
-
-	results := Kmeans(i, num_colors)
-
-	return results, nil
 }
 
 // Images

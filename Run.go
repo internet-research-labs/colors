@@ -12,18 +12,6 @@ import (
 	"time"
 )
 
-func ColorToHex(c color.RGBA) string {
-	return fmt.Sprintf("%02X%02X%02X", c.R, c.G, c.B)
-}
-
-// Load Image
-func LoadImage(filename string) image.Image {
-	file, _ := os.Open(filename)
-	defer file.Close()
-	img, _ := jpeg.Decode(file)
-	return img
-}
-
 func OutputImage(filename string, img image.Image) {
 	dst, _ := os.Create(filename)
 	defer dst.Close()
