@@ -8,7 +8,25 @@ import (
 	"time"
 )
 
-//
+// How to compute the representative color of a cluster
+func ColorMean(list []color.RGBA) color.RGBA {
+	r, g, b, a := 0.0, 0.0, 0.0, 0.0
+	n := float64(len(list))
+	for _, v := range list {
+		r += float64(v.R)
+		g += float64(v.G)
+		b += float64(v.B)
+		a += float64(v.A)
+	}
+	return color.RGBA{
+		uint8(r / n),
+		uint8(g / n),
+		uint8(b / n),
+		uint8(a / n),
+	}
+}
+
+// Return num_colors clusters for a given image
 func KMeans(img image.Image, num_colors int) Results {
 	results := make(map[color.RGBA]int)
 	final := make(Results, 0)

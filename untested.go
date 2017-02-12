@@ -46,23 +46,6 @@ func (slice Results) Swap(i, j int) {
 
 // ...
 
-func ColorMean(list []color.RGBA) color.RGBA {
-	r, g, b, a := 0.0, 0.0, 0.0, 0.0
-	n := float64(len(list))
-	for _, v := range list {
-		r += float64(v.R)
-		g += float64(v.G)
-		b += float64(v.B)
-		a += float64(v.A)
-	}
-	return color.RGBA{
-		uint8(r / n),
-		uint8(g / n),
-		uint8(b / n),
-		uint8(a / n),
-	}
-}
-
 func ColorVector(img image.Image) []color.RGBA {
 	scaled_down_image := ScaleDown(img)
 	bounds := scaled_down_image.Bounds()
